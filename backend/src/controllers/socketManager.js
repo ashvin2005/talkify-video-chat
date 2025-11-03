@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
-import { db } from "../firebase.js"; // Firebase admin
+import { db } from "../firebase.js"; 
 
-const rooms = new Map(); // Stores socket IDs by room code
+const rooms = new Map();
 const timeOnline = {};
 
 export const connectToSocket = (server) => {
@@ -13,7 +13,7 @@ export const connectToSocket = (server) => {
       credentials: true,
     },
     connectionStateRecovery: {
-      maxDisconnectionDuration: 2 * 60 * 1000, // 2 minutes
+      maxDisconnectionDuration: 2 * 60 * 1000, 
       skipMiddlewares: true,
     },
   });
@@ -33,39 +33,30 @@ export const connectToSocket = (server) => {
           throw new Error("Invalid room code");
         }
 
-        // Clean the room code
         const cleanRoomCode = roomCode.replace(/[^a-zA-Z0-9-]/g, "");
 
-        // Leave any previous room
         if (currentRoom) {
           socket.leave(currentRoom);
           removeFromRoom(currentRoom, socket.id);
         }
 
-        // Join the new room
         currentRoom = cleanRoomCode;
         socket.join(currentRoom);
 
-        // Initialize room if it doesn't exist
         if (!rooms.has(currentRoom)) {
           rooms.set(currentRoom, new Set());
         }
 
-        // Add socket to room
         rooms.get(currentRoom).add(socket.id);
         timeOnline[socket.id] = new Date();
 
-        // Get all clients in this room
         const clients = await io.in(currentRoom).fetchSockets();
         const clientIds = clients.map((client) => client.id);
 
-        // Notify the client they've joined
         socket.emit("room-joined", currentRoom);
 
-        // Notify all clients in the room about the new participant
         io.to(currentRoom).emit("user-joined", socket.id, clientIds);
 
-        // Send previous messages from Firestore
         try {
           const chatSnapshot = await db
             .collection("meetings")
@@ -79,7 +70,6 @@ export const connectToSocket = (server) => {
             messages.push(doc.data());
           });
 
-          // Send all messages at once
           socket.emit("chat-history", messages);
         } catch (e) {
           console.error("Error fetching messages:", e);
