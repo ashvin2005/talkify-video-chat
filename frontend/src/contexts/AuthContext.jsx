@@ -25,7 +25,6 @@ export const AuthProvider = ({ children }) => {
     try {
       setAuthError("");
       
-      // First check if we have a redirect result (from previous redirect)
       try {
         const result = await getRedirectResult(auth);
         if (result) {
@@ -52,7 +51,6 @@ export const AuthProvider = ({ children }) => {
         console.log("No redirect result, trying popup...");
       }
 
-      // Try popup method first
       const result = await signInWithPopup(auth, googleProvider);
       const { user } = result;
       const idToken = await user.getIdToken(true); // Force refresh token
@@ -73,8 +71,7 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (err) {
       console.error("Google sign-in error:", err);
-      
-      // If popup fails, try redirect
+
       if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user') {
         console.log("Popup blocked, trying redirect...");
         try {
@@ -91,7 +88,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Add this to your AuthContext
   const verifyToken = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -113,7 +109,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Update your AuthProvider component
+
   useEffect(() => {
     const checkAuth = async () => {
       const isValid = await verifyToken();
@@ -132,7 +128,7 @@ export const AuthProvider = ({ children }) => {
     navigate("/");
   };
 
-  /** REGISTER */
+
   const handleRegister = async (name, username, password) => {
     try {
       const res = await client.post("/register", {
@@ -150,7 +146,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  /** LOGIN */
+
   const handleLogin = async (username, password) => {
     try {
       const res = await client.post("/login", { username, password });
@@ -166,7 +162,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  /** ADD TO HISTORY */
+
   const addToUserHistory = async (meetingCode) => {
     try {
       const token = localStorage.getItem("token");
@@ -183,7 +179,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  /** GET HISTORY */
+
   const getHistoryOfUser = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -198,7 +194,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  /** CONTEXT VALUE */
+
   const value = {
     userData,
     setUserData,
