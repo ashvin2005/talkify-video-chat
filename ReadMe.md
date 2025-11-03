@@ -65,40 +65,8 @@ Talkify enables users to sign up via Google or email, create or join meeting roo
 
 ---
 
-## 🚀 Quick Start
-
-### Prerequisites
-- Node.js (v16+)
-- Firebase account ([Get started here](https://console.firebase.google.com/))
-
-### Installation
-
-1. **Clone the repository**
-```bash
-git clone <your-repo-url>
-cd talkify
-```
-
-2. **Setup Backend**
-```bash
-cd backend
-npm install
-cp .env.example .env
-# Edit .env with your Firebase Admin credentials
-npm run dev
-```
-
-3. **Setup Frontend** (in a new terminal)
-```bash
-cd frontend
-npm install
-cp .env.example .env
-# Edit .env with your Firebase Web credentials
-npm run dev
-```
-
-4. **Access the app**
-   - Frontend: http://localhost:5173
-   - Backend: http://localhost:8000
+ **Access the website**
+   - Frontend: https://talkify-video-chat.vercel.app/
+   - Backend: https://talkify-video-chat.onrender.com
 
 ---
