@@ -4,7 +4,6 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { admin } from "../firebase.js";
 
-// ================ Register
 export const register = async (req, res) => {
   const { name, username, password } = req.body;
 
@@ -13,7 +12,6 @@ export const register = async (req, res) => {
   }
 
   try {
-    // Check if user exists
     const userSnap = await db.collection("users").doc(username).get();
     if (userSnap.exists) {
       return res
@@ -21,10 +19,8 @@ export const register = async (req, res) => {
         .json({ message: "User already exists" });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Save to Firestore
     await db.collection("users").doc(username).set({
       name,
       username,
@@ -39,7 +35,6 @@ export const register = async (req, res) => {
   }
 };
 
-// ================ Login
 export const login = async (req, res) => {
   const { username, password } = req.body;
 
@@ -83,7 +78,6 @@ export const login = async (req, res) => {
   }
 };
 
-// ================ Google Auth
 export const googleAuth = async (req, res) => {
   const { idToken } = req.body;
 
@@ -94,11 +88,6 @@ export const googleAuth = async (req, res) => {
   try {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
 
-    // Verify the token audience matches your Firebase project ID
-    // if (decodedToken.aud !== "your-project-id") {
-    //   throw new Error("Invalid audience claim");
-    // }
-
     const { uid, email, name, picture } = decodedToken;
     const username = email.split("@")[0];
 
@@ -107,7 +96,6 @@ export const googleAuth = async (req, res) => {
 
     let token;
     if (!userSnap.exists) {
-      // Create new user with persistent token
       token = crypto.randomBytes(20).toString("hex");
       await userRef.set({
         uid,
@@ -121,7 +109,6 @@ export const googleAuth = async (req, res) => {
         lastLogin: admin.firestore.FieldValue.serverTimestamp(),
       });
     } else {
-      // Use existing token if it's still valid (not expired)
       const userData = userSnap.data();
       const tokenAge =
         Date.now() - (userData.lastLogin?.toDate()?.getTime() || 0);
@@ -154,7 +141,6 @@ export const googleAuth = async (req, res) => {
   }
 };
 
-// Add this to your userController.js
 export const verifyToken = async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1] || req.query.token;
   
@@ -178,7 +164,6 @@ export const verifyToken = async (req, res) => {
       });
     }
 
-    // Get user data without sensitive information
     const userData = usersQuery.docs[0].data();
     const { password, token: _, ...safeUserData } = userData;
 
@@ -195,7 +180,6 @@ export const verifyToken = async (req, res) => {
   }
 };
 
-// ================ Add to Meeting History
 export const addToHistory = async (req, res) => {
   const { token, meeting_code } = req.body;
 
@@ -206,7 +190,6 @@ export const addToHistory = async (req, res) => {
   }
 
   try {
-    // Find user by token
     const usersQuery = await db
       .collection("users")
       .where("token", "==", token)
@@ -220,7 +203,6 @@ export const addToHistory = async (req, res) => {
 
     const user = usersQuery.docs[0].data();
 
-    // Add meeting to Firestore
     await db.collection("meetings").add({
       user_id: user.username,
       meetingCode: meeting_code,
@@ -236,7 +218,6 @@ export const addToHistory = async (req, res) => {
   }
 };
 
-// ================ Get User Meeting History
 export const getUserHistory = async (req, res) => {
   const { token } = req.query;
 
@@ -245,7 +226,6 @@ export const getUserHistory = async (req, res) => {
   }
 
   try {
-    // Find user by token
     const usersQuery = await db
       .collection("users")
       .where("token", "==", token)
@@ -259,7 +239,6 @@ export const getUserHistory = async (req, res) => {
 
     const user = usersQuery.docs[0].data();
 
-    // Get meetings
     const meetingsSnapshot = await db
       .collection("meetings")
       .where("user_id", "==", user.username)
